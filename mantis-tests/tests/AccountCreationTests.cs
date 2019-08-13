@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NUnit.Framework;
 using System.IO;
 using TestContext = NUnit.Framework.TestContext;
+
 namespace mantis_tests
 {
     [TestFixture]
