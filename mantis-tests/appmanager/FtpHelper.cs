@@ -5,20 +5,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Net.FtpClient;
+
 namespace mantis_tests
 {
-    public class FTPHelper : HelperBase
+    public class FtpHelper : HelperBase
     {
-        private FtpClient client;
-        public FTPHelper(ApplicationManager manager) : base(manager)
+        public FtpHelper(ApplicationManager manager) : base(manager)
         {
             client = new FtpClient();
             client.Host = "localhost";
-            client.Credentials = new System.Net.NetworkCredential("user1", "user1");
+            client.Credentials = new System.Net.NetworkCredential("mantis", "mantis");
             client.Connect();
         }
 
-        public void BackupFile(String path)
+        private FtpClient client;
+
+        public void BackupFile(String path)//Сущестсвующий конфиг забэкапить
         {
             String backupPath = path + ".bak";
             if (client.FileExists(backupPath))
@@ -27,10 +29,12 @@ namespace mantis_tests
             }
             client.Rename(path, backupPath);
         }
-        public void RestoreBackupFile(String path)
+
+
+        public void RestoreBackupFile(String path)//Восстанивить файл из резервной копии
         {
             String backupPath = path + ".bak";
-            if (!client.FileExists(backupPath))
+            if (! client.FileExists(backupPath))
             {
                 return;
             }
@@ -38,24 +42,32 @@ namespace mantis_tests
             {
                 client.DeleteFile(path);
             }
+
             client.Rename(backupPath, path);
+
         }
-        public void UploadFile(String path, Stream localFile)
+
+        public void Upload(String path, Stream localfile)
         {
             if (client.FileExists(path))
             {
                 client.DeleteFile(path);
             }
-            using (Stream ftpSream = client.OpenWrite(path))
+
+
+            using (Stream ftpStream = client.OpenWrite(path))
             {
                 byte[] buffer = new byte[8 * 1024];
-                int count = localFile.Read(buffer, 0, buffer.Length);
-                while (count > 0)
+                int count = localfile.Read(buffer, 0, buffer.Length);
+                while (count >0)
                 {
-                    ftpSream.Write(buffer, 0, count);
-                    count = localFile.Read(buffer, 0, buffer.Length);
+                    ftpStream.Write(buffer, 0, count);
+                    count = localfile.Read(buffer, 0, buffer.Length);
                 }
+
+
             }
         }
+
     }
 }

@@ -1,12 +1,18 @@
-﻿using System;
+// minimalistic telnet implementation
+// conceived by Tom Janssens on 2007/06/06  for codeproject
+//
+// http://www.corebvba.be
+
+
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 
 namespace MinimalisticTelnet
 {
-    enum Verbs
-    {
+    enum Verbs {
         WILL = 251,
         WONT = 252,
         DO = 253,
@@ -31,13 +37,13 @@ namespace MinimalisticTelnet
 
         }
 
-        public string Login(string Username, string Password, int LoginTimeOutMs)
+        public string Login(string Username,string Password,int LoginTimeOutMs)
         {
             int oldTimeOutMs = TimeOutMs;
             TimeOutMs = LoginTimeOutMs;
             string s = Read();
             if (!s.TrimEnd().EndsWith(":"))
-                throw new Exception("Failed to connect : no login prompt");
+               throw new Exception("Failed to connect : no login prompt");
             WriteLine(Username);
 
             s += Read();
@@ -58,14 +64,14 @@ namespace MinimalisticTelnet
         public void Write(string cmd)
         {
             if (!tcpSocket.Connected) return;
-            byte[] buf = System.Text.ASCIIEncoding.ASCII.GetBytes(cmd.Replace("\0xFF", "\0xFF\0xFF"));
+            byte[] buf = System.Text.ASCIIEncoding.ASCII.GetBytes(cmd.Replace("\0xFF","\0xFF\0xFF"));
             tcpSocket.GetStream().Write(buf, 0, buf.Length);
         }
 
         public string Read()
         {
             if (!tcpSocket.Connected) return null;
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb=new StringBuilder();
             do
             {
                 ParseTelnet(sb);
@@ -86,7 +92,7 @@ namespace MinimalisticTelnet
                 int input = tcpSocket.GetStream().ReadByte();
                 switch (input)
                 {
-                    case -1:
+                    case -1 :
                         break;
                     case (int)Verbs.IAC:
                         // interpret as command
@@ -94,11 +100,11 @@ namespace MinimalisticTelnet
                         if (inputverb == -1) break;
                         switch (inputverb)
                         {
-                            case (int)Verbs.IAC:
+                            case (int)Verbs.IAC: 
                                 //literal IAC = 255 escaped, so append char 255 to string
                                 sb.Append(inputverb);
                                 break;
-                            case (int)Verbs.DO:
+                            case (int)Verbs.DO: 
                             case (int)Verbs.DONT:
                             case (int)Verbs.WILL:
                             case (int)Verbs.WONT:
@@ -106,10 +112,10 @@ namespace MinimalisticTelnet
                                 int inputoption = tcpSocket.GetStream().ReadByte();
                                 if (inputoption == -1) break;
                                 tcpSocket.GetStream().WriteByte((byte)Verbs.IAC);
-                                if (inputoption == (int)Options.SGA)
-                                    tcpSocket.GetStream().WriteByte(inputverb == (int)Verbs.DO ? (byte)Verbs.WILL : (byte)Verbs.DO);
+                                if (inputoption == (int)Options.SGA )
+                                    tcpSocket.GetStream().WriteByte(inputverb == (int)Verbs.DO ? (byte)Verbs.WILL:(byte)Verbs.DO); 
                                 else
-                                    tcpSocket.GetStream().WriteByte(inputverb == (int)Verbs.DO ? (byte)Verbs.WONT : (byte)Verbs.DONT);
+                                    tcpSocket.GetStream().WriteByte(inputverb == (int)Verbs.DO ? (byte)Verbs.WONT : (byte)Verbs.DONT); 
                                 tcpSocket.GetStream().WriteByte((byte)inputoption);
                                 break;
                             default:
@@ -117,7 +123,7 @@ namespace MinimalisticTelnet
                         }
                         break;
                     default:
-                        sb.Append((char)input);
+                        sb.Append( (char)input );
                         break;
                 }
             }

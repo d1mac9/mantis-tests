@@ -13,45 +13,50 @@ namespace mantis_tests
 
         public void Add(AccountData account)
         {
-            if (Verify(account))
+            if (Verify(account))//Если аккоунт создан, то нифига не делаем
             {
                 return;
             }
             TelnetConnection telnet = LoginToJames();
-            telnet.WriteLine("adduser " + account.Name + " " + account.Password);
-            System.Console.Out.WriteLine(telnet.Read());
+            telnet.WriteLine("adduser "+account.Name + " " + account.Password);//добавляем пользователя
+            System.Console.Out.WriteLine(telnet.Read()); 
+
         }
 
-        public void Delete(AccountData account)
+        public void Delete (AccountData account)
         {
-            if (!Verify(account))
+            if (! Verify(account))//Если аккоунт создан, то нифига не делаем
             {
                 return;
             }
             TelnetConnection telnet = LoginToJames();
-            telnet.WriteLine("deluser " + account.Name);
+            telnet.WriteLine("deluser " + account.Name);//добавляем пользователя
             System.Console.Out.WriteLine(telnet.Read());
+
         }
+
+
 
         public bool Verify(AccountData account)
         {
             TelnetConnection telnet = LoginToJames();
-            telnet.WriteLine("verify " + account.Name);
-            string s = telnet.Read();
+            telnet.WriteLine("verify " + account.Name);//добавляем пользователя
+            String s = telnet.Read();
             System.Console.Out.WriteLine(s);
-            return !s.Contains("does not exist");
 
+            return ! s.Contains("does not exist");
         }
 
         private TelnetConnection LoginToJames()
         {
             TelnetConnection telnet = new TelnetConnection("localhost", 4555);
-            System.Console.Out.WriteLine(telnet.Read());
-            telnet.WriteLine("root");
-            System.Console.Out.WriteLine(telnet.Read());
-            telnet.WriteLine("root");
-            System.Console.Out.WriteLine(telnet.Read());
+            System.Console.Out.WriteLine(telnet.Read()); //Читаем текст, который James вывел на консоль и выводим на консоль
+            telnet.WriteLine("root"); //Это вводится логин
+            System.Console.Out.WriteLine(telnet.Read()); //Читаем текст, который James вывел на консоль и выводим на консоль
+            telnet.WriteLine("root");//Это вводится пароль
+            System.Console.Out.WriteLine(telnet.Read()); //Читаем текст, который James вывел на консоль и выводим на консоль
             return telnet;
         }
+
     }
 }

@@ -2,59 +2,84 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
+using NUnit.Framework;
+using System.Threading.Tasks;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
-using System.IO;
+
 namespace mantis_tests
 {
-    public class ApplicationManager
+    public class ApplicationManager : TestBase
     {
-        protected IWebDriver driver;
+        protected IWebDriver driver;// Protected означает что "оно все еще внутреннее, но наследники тоже получают доступ"
         protected string baseURL;
-        public RegistrationHelper Registration { get; set; }
-        public FTPHelper Ftp { get; set; }
-        public JamesHelper James { get; set; }
-        public MailHelper Mail { get; set; }
-        private static ThreadLocal<ApplicationManager> app = new ThreadLocal<ApplicationManager>();
+        
+        
+
+         private static ThreadLocal<ApplicationManager> app = new ThreadLocal<ApplicationManager>();//устанавливает соответствие между текущим потоком и объектом типа ApplicationManager
+
+
+
+
         private ApplicationManager()
         {
             driver = new FirefoxDriver();
-            baseURL = "http://localhost";
+            baseURL = "http://localhost/mantisbt-1.2.17";
+      
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(100);//   //Костыль - чтобы не падало при массовом запуске
             Registration = new RegistrationHelper(this);
-            Ftp = new FTPHelper(this);
+            Ftp = new FtpHelper(this);
             James = new JamesHelper(this);
             Mail = new MailHelper(this);
-            //driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
+            Project = new ProjectHelper(this);
+            Admin = new AdminHelper(this, baseURL);
+            API = new APIHelper(this);
         }
-        ~ApplicationManager()
+
+
+        ~ApplicationManager() //Деструктор (тильдаКласс)
         {
             try
             {
-                driver.Quit();
+                Driver.Quit();//Остановка браузера
             }
             catch (Exception)
             {
-                //Ignore errors if unable to close the browser
+                // Ignore errors if unable to close the browser
             }
         }
 
-
-        public static ApplicationManager GetInstance()
+        public static ApplicationManager GetInstance() //static - глобальный. Можно будет обращаться как к ApplicationManager.GetInstance()
         {
-            if (!app.IsValueCreated)
+            if (! app.IsValueCreated) //Если для текущего потока внутри этого хранилища ничего не создано, то создаем
             {
                 ApplicationManager newInstance = new ApplicationManager();
-                newInstance.driver.Url = "http://localhost/mantisbt-2.21.1/mantisbt-2.21.1/login_page.php";
+                newInstance.driver.Url = newInstance.baseURL + "/login_page.php";
                 app.Value = newInstance;
+                
             }
             return app.Value;
         }
+
+        //http://localhost/mantisbt-1.2.17/admin/install.php
+
+
         public IWebDriver Driver
         {
-            get { return driver; }
+            get
+            {
+                return driver;
+            }
         }
+
+        public RegistrationHelper Registration { get; set; }
+        public FtpHelper Ftp { get;  set; }
+        public JamesHelper James { get; set; }
+        public MailHelper Mail { get; set; }
+        public ProjectHelper Project { get; set; }
+        public AdminHelper Admin { get; set;  }
+        public APIHelper API { get;  set; }
     }
 }
